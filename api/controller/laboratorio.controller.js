@@ -14,23 +14,25 @@ async function listarLaboratorios(req, res) {
 }
 
 // Cadastrar um novo laboratório
-async function cadastrarLaboratorio(req, res) {
-  try {
-    const { nome, descricao, capacidade, foto } = req.body;
+const cadastrarLaboratorio = async (req, res) => {
+  const { nome, descricao, capacidade } = req.body;
+  const foto = req.file?.path; // URL da imagem vinda do Cloudinary
 
+  try {
     const novoLaboratorio = new Laboratorio({
       nome,
       descricao,
       capacidade,
-      foto,
+      foto
     });
 
-    const laboratorioSalvo = await novoLaboratorio.save();
-    res.status(201).json(laboratorioSalvo);
+    await novoLaboratorio.save();
+    res.status(201).json({ mensagem: 'Laboratório cadastrado com sucesso!' });
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao cadastrar laboratório' });
+    res.status(500).json({ erro: 'Erro ao cadastrar laboratório.' });
   }
 }
+
 
 // Gerar relatório em PDF
 async function gerarRelatorio(req, res) {
