@@ -38,11 +38,7 @@ const cadastrarLaboratorio = async (req, res) => {
 async function gerarRelatorio(req, res) {
   try {
     const laboratorios = await Laboratorio.find();
-    const pdfBuffer = await gerarRelatorioLaboratorios(laboratorios);
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename="relatorio_laboratorios.pdf"');
-    res.send(pdfBuffer);
+    await gerarRelatorioLaboratorios(laboratorios, res);
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensagem: 'Erro ao gerar relatório' });
