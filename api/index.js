@@ -7,7 +7,6 @@ const permitirSomenteDiasUteis = require('./middlewares/diasUteis');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 // Middleware para permitir apenas dias úteis
 app.use(permitirSomenteDiasUteis);
@@ -20,6 +19,5 @@ conectarBanco();
 app.use('/api/auth', authRoutes);
 app.use('/api/laboratorios', autenticarToken, rotasLaboratorios);
 
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando na porta ${PORT}`);
-});
+
+module.exports = app;
