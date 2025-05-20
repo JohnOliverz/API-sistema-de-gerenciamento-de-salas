@@ -38,23 +38,16 @@ const cadastrarLaboratorio = async (req, res) => {
 async function gerarRelatorio(req, res) {
   try {
     const laboratorios = await Laboratorio.find();
-    const outputPath = path.join(__dirname, '..', 'relatorio_laboratorios.pdf');
+    const pdfBuffer = await gerarRelatorioLaboratorios(laboratorios);
 
-    await gerarRelatorioLaboratorios(laboratorios, outputPath);
-
-    res.download(outputPath, 'relatorio_laboratorios.pdf', (err) => {
-      if (err) {
-        console.error(err);
-        res.status(500).send('Erro ao baixar o PDF.');
-      }
-    });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="relatorio_laboratorios.pdf"');
+    res.send(pdfBuffer);
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensagem: 'Erro ao gerar relatório' });
   }
 }
-
-
 
 module.exports = {
     listarLaboratorios,
