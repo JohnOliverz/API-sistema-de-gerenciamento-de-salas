@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const Usuario = require('../models/Usuario');
 
-const JWT_SECRET = 'segredo_super_secreto'; // Em produção, use dotenv
+const JWT_SECRET = process.env.JWT_SECRET; // Em produção, use dotenv
 
 // Função para cadastrar usuário
 const cadastrarUsuario = async (req, res) => {
