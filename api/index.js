@@ -4,9 +4,15 @@ const authRoutes = require('./routes/auth.routes');
 const rotasLaboratorios = require('./routes/laboratorio.routes');
 const autenticarToken = require('./middlewares/autenticacao');
 const permitirSomenteDiasUteis = require('./middlewares/diasUteis');
+const mensagemHome = require('./utils/mensagemHome'); 
 require('dotenv').config();
 
 const app = express();
+
+// Pagina inicial
+app.get('/', (req, res) => {
+  res.send(mensagemHome);
+});
 
 // Middleware para permitir apenas dias úteis
 app.use(permitirSomenteDiasUteis);
