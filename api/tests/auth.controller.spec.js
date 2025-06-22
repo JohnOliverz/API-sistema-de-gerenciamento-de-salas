@@ -1,11 +1,11 @@
 const request = require('supertest');
-const app = require('../../../app'); 
-const Usuario = require('../../models/Usuario');
+const app = require('../../api/index'); 
+const Usuario = require('../models/Usuario');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 // Mock completo dos módulos
-jest.mock('../../models/Usuario', () => {
+jest.mock('../models/Usuario', () => {
   return jest.fn().mockImplementation(function (data) {
     return {
       ...data,
@@ -31,7 +31,7 @@ jest.mock('jsonwebtoken', () => ({
 }));
 
 // Mock do middleware de autenticação
-jest.mock('../../../api/middlewares/autenticacao', () => 
+jest.mock('../middlewares/autenticacao', () => 
   jest.fn((req, res, next) => next())
 );
 
