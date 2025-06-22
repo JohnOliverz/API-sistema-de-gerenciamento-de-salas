@@ -13,14 +13,16 @@
     "multer": "^1.4.5-lts.2",
     "multer-storage-cloudinary": "^4.0.0",
     "pdfkit": "^0.17.1",
-    "sharp": "^0.34.1"
+    "sharp": "^0.34.1",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "jest": "^29.7.0",
+    "mongodb-memory-server": "^10.1.4",
     "nodemon": "^3.1.10",
     "supertest": "^7.1.1"
   },
-      "scripts": {
-      "test": "jest --passWithNoTests"
-    }
+  "scripts": {
+    "test": "jest --passWithNoTests"
+  }
 }
