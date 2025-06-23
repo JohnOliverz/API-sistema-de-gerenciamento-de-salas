@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title> 🔊 Notificações de Laboratórios</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #notificacoes p { padding: 5px; margin: 5px 0; background: #f0f0f0; border-left: 4px solid #007bff; }
+  </style>
+</head>
+<body>
+  <h1>🔒 Notificações de Bloqueio de Laboratório</h1>
+  <div id="notificacoes"></div>
+
+  <script>
+    const socket = io('http://localhost:6500');
+
+    socket.on('connect', () => {
+      try {
+      console.log('✅ Conectado ao servidor Socket.IO');
+    } catch (error) {
+      console.error('❌ Erro ao conectar ao servidor Socket.IO:', error);
+
+    }});
+
+    socket.onAny((event, data) => {
+      console.log(`📡 Evento recebido: ${event}`, data);
+      const div = document.getElementById('notificacoes');
+      const p = document.createElement('p');
+      p.textContent = `[${event}] ${data?.mensagem || 'Mensagem vazia'}`;
+      div.appendChild(p);
+    });
+
+    labs = []; 
+    labs.forEach((lab) => {
+      const canal = `bloquear:${lab}`;
+      socket.on(canal, (data) => {
+        const div = document.getElementById('notificacoes');
+        const p = document.createElement('p');
+        p.textContent = data.mensagem;
+        div.appendChild(p);
+      });
+    });
+  </script>
+</body>
+</html>
