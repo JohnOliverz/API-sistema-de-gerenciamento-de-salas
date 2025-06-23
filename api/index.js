@@ -3,9 +3,9 @@ const path = require('path');
 const express = require('express');
 const conectarBanco = require('./config/bd');
 const authRoutes = require('./routes/auth.routes');
+const temperaturaRoutes = require('./routes/temperatura.routes');
 const rotasLaboratorios = require('./routes/laboratorio.routes');
 const mensagemHome = require('./utils/mensagemHome'); 
-const autenticarToken = require('./middlewares/autenticacao');
 const permitirSomenteDiasUteis = require('./middlewares/diasUteis');
 const socketIO = require('./socket');
 
@@ -31,7 +31,8 @@ app.use(express.json());
 conectarBanco();
 
 app.use('/api/auth', authRoutes);
-app.use('/api/laboratorios', autenticarToken, rotasLaboratorios);
+app.use('/api/laboratorios', rotasLaboratorios);
+app.use('/api', temperaturaRoutes);
 
 // Verifica se está rodando localmente ou em ambiente de produção
 if (require.main === module) {
