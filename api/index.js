@@ -19,6 +19,9 @@ socketIO.init(server); // inicia socket.io com esse server
 // Servir arquivos HTML/CSS/JS estáticos da pasta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Servir documentação Swagger
+app.use('/docs', express.static(path.join(__dirname, '..')));
+
 // Página inicial
 app.get('/', (req, res) => {
   res.send(mensagemHome);

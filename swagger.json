@@ -1,0 +1,638 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "API de Gerenciamento de Salas",
+    "description": "API para gerenciamento de laboratórios e salas com monitoramento de temperatura",
+    "version": "1.0.0"
+  },
+  "host": "localhost:6500",
+  "basePath": "/",
+  "schemes": ["http", "https"],
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header",
+      "description": "Insira o token JWT com o prefixo Bearer. Exemplo: 'Bearer {seu_token}'"
+    }
+  },
+  "paths": {
+    "/api/auth/cadastrar": {
+      "post": {
+        "tags": ["Autenticação"],
+        "summary": "Cadastrar novo usuário",
+        "description": "Cria um novo usuário no sistema",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Dados do usuário a ser cadastrado",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["nome", "email", "senha"],
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "example": "João Silva",
+                  "description": "Nome completo do usuário"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "joao@exemplo.com",
+                  "description": "Email do usuário (deve ser único)"
+                },
+                "senha": {
+                  "type": "string",
+                  "example": "senha123",
+                  "description": "Senha do usuário (será criptografada)"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Usuário cadastrado com sucesso",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mensagem": {
+                  "type": "string",
+                  "example": "Usuário cadastrado com sucesso"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email já cadastrado",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mensagem": {
+                  "type": "string",
+                  "example": "E-mail já cadastrado"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "erro": {
+                  "type": "string",
+                  "example": "Erro ao cadastrar usuário"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logar": {
+      "post": {
+        "tags": ["Autenticação"],
+        "summary": "Autenticar usuário",
+        "description": "Autentica um usuário e retorna um token JWT",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Credenciais do usuário",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["email", "senha"],
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "joao@exemplo.com",
+                  "description": "Email do usuário"
+                },
+                "senha": {
+                  "type": "string",
+                  "example": "senha123",
+                  "description": "Senha do usuário"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Autenticação bem-sucedida",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string",
+                  "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciais inválidas",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mensagem": {
+                  "type": "string",
+                  "example": "Usuário não encontrado ou Senha inválida"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "erro": {
+                  "type": "string",
+                  "example": "Erro no servidor"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/tutorial": {
+      "get": {
+        "tags": ["Autenticação"],
+        "summary": "Obter vídeo tutorial",
+        "description": "Retorna um vídeo tutorial em formato MP4",
+        "produces": ["video/mp4"],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "range",
+            "type": "string",
+            "required": false,
+            "description": "Range de bytes para streaming de vídeo (opcional)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vídeo completo",
+            "schema": {
+              "type": "file",
+              "format": "binary"
+            }
+          },
+          "206": {
+            "description": "Parte do vídeo (streaming)",
+            "schema": {
+              "type": "file",
+              "format": "binary"
+            }
+          },
+          "404": {
+            "description": "Vídeo não encontrado",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "erro": {
+                  "type": "string",
+                  "example": "Vídeo não encontrado"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/laboratorios": {
+      "get": {
+        "tags": ["Laboratórios"],
+        "summary": "Listar todos os laboratórios",
+        "description": "Retorna a lista de todos os laboratórios cadastrados",
+        "produces": ["application/json"],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de laboratórios",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Laboratorio"
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado - Token ausente",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mensagem": {
+                  "type": "string",
+                  "example": "Token ausente"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Proibido - Token inválido",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mensagem": {
+                  "type": "string",
+                  "example": "Token inválido"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "erro": {
+                  "type": "string",
+                  "example": "Erro ao buscar laboratórios"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/laboratorios/novo": {
+      "post": {
+        "tags": ["Laboratórios"],
+        "summary": "Cadastrar novo laboratório",
+        "description": "Cria um novo laboratório com foto",
+        "consumes": ["multipart/form-data"],
+        "produces": ["application/json"],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "nome",
+            "type": "string",
+            "required": true,
+            "description": "Nome do laboratório"
+          },
+          {
+            "in": "formData",
+            "name": "descricao",
+            "type": "string",
+            "required": true,
+            "description": "Descrição do laboratório"
+          },
+          {
+            "in": "formData",
+            "name": "capacidade",
+            "type": "integer",
+            "required": true,
+            "description": "Capacidade de pessoas do laboratório"
+          },
+          {
+            "in": "formData",
+            "name": "foto",
+            "type": "file",
+            "required": false,
+            "description": "Foto do laboratório"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Laboratório cadastrado com sucesso",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mensagem": {
+                  "type": "string",
+                  "example": "Laboratório cadastrado com sucesso!"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado - Token ausente",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mensagem": {
+                  "type": "string",
+                  "example": "Token ausente"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Proibido - Token inválido",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mensagem": {
+                  "type": "string",
+                  "example": "Token inválido"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "erro": {
+                  "type": "string",
+                  "example": "Erro ao cadastrar laboratório."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/laboratorios/relatorio": {
+      "get": {
+        "tags": ["Laboratórios"],
+        "summary": "Gerar relatório PDF",
+        "description": "Gera um relatório PDF com informações de todos os laboratórios",
+        "produces": ["application/pdf"],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Relatório PDF gerado com sucesso",
+            "schema": {
+              "type": "file",
+              "format": "binary"
+            }
+          },
+          "401": {
+            "description": "Não autorizado - Token ausente",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mensagem": {
+                  "type": "string",
+                  "example": "Token ausente"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Proibido - Token inválido",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mensagem": {
+                  "type": "string",
+                  "example": "Token inválido"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mensagem": {
+                  "type": "string",
+                  "example": "Erro ao gerar relatório"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/laboratorios/bloquear/{lab}": {
+      "post": {
+        "tags": ["Laboratórios"],
+        "summary": "Bloquear laboratório",
+        "description": "Bloqueia um laboratório específico e emite notificação via Socket.IO",
+        "produces": ["application/json"],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lab",
+            "type": "string",
+            "required": true,
+            "description": "Nome do laboratório a ser bloqueado"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Laboratório bloqueado com sucesso",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mensagem": {
+                  "type": "string",
+                  "example": "Lab01 bloqueado."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado - Token ausente",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mensagem": {
+                  "type": "string",
+                  "example": "Token ausente"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Proibido - Token inválido",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mensagem": {
+                  "type": "string",
+                  "example": "Token inválido"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Laboratório não encontrado",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "erro": {
+                  "type": "string",
+                  "example": "Laboratório não encontrado."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "erro": {
+                  "type": "string",
+                  "example": "Erro ao bloquear laboratório."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/temperatura": {
+      "get": {
+        "tags": ["Temperatura"],
+        "summary": "Registrar temperatura",
+        "description": "Recebe e registra uma temperatura enviada via ESP32",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "temp",
+            "type": "string",
+            "required": true,
+            "description": "Valor da temperatura em graus Celsius"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Temperatura registrada com sucesso",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mensagem": {
+                  "type": "string",
+                  "example": "Temperatura 25.5°C registrada."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Temperatura não informada",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "erro": {
+                  "type": "string",
+                  "example": "Temperatura não informada."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/temperaturaAtual": {
+      "get": {
+        "tags": ["Temperatura"],
+        "summary": "Obter temperatura atual",
+        "description": "Retorna a última temperatura registrada",
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Temperatura atual",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "temperatura": {
+                  "type": "string",
+                  "example": "25.5"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Nenhuma temperatura registrada",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "erro": {
+                  "type": "string",
+                  "example": "Nenhuma temperatura registrada ainda."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Usuario": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "example": "60d21b4667d0d8992e610c85"
+        },
+        "nome": {
+          "type": "string",
+          "example": "João Silva"
+        },
+        "email": {
+          "type": "string",
+          "example": "joao@exemplo.com"
+        },
+        "senha": {
+          "type": "string",
+          "example": "$2b$10$X/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        }
+      }
+    },
+    "Laboratorio": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "example": "60d21b4667d0d8992e610c85"
+        },
+        "nome": {
+          "type": "string",
+          "example": "Laboratório de Informática 01"
+        },
+        "descricao": {
+          "type": "string",
+          "example": "Laboratório com 20 computadores para aulas práticas"
+        },
+        "capacidade": {
+          "type": "integer",
+          "example": 20
+        },
+        "bloqueado": {
+          "type": "boolean",
+          "example": false
+        },
+        "foto": {
+          "type": "string",
+          "example": "uploads/lab01.jpg"
+        }
+      }
+    }
+  }
+}
